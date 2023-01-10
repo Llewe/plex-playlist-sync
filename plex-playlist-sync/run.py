@@ -32,7 +32,8 @@ while True:
 
     if userInputs.plex_url and userInputs.plex_token:
         try:
-            plex = PlexServer(userInputs.plex_url, userInputs.plex_token)
+            print("Plexserver timout = 90")
+            plex = PlexServer(userInputs.plex_url, userInputs.plex_token,timeout=90)
         except:
             logging.error("Plex Authorization error")
             break
@@ -56,7 +57,10 @@ while True:
                 auth_manager=SpotifyClientCredentials(
                     userInputs.spotipy_client_id,
                     userInputs.spotipy_client_secret,
-                )
+                ),
+                retries= 10,
+                status_retries=10,
+                requests_timeout=10
             )
             SP_AUTHSUCCESS = True
         except:

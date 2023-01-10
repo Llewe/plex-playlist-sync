@@ -3,10 +3,10 @@ from typing import List
 
 import spotipy
 from plexapi.server import PlexServer
+from spotipy.oauth2 import SpotifyClientCredentials
 
 from .helperClasses import Playlist, Track, UserInputs
 from .plex import update_or_create_plex_playlist
-
 
 def _get_sp_user_playlists(
     sp: spotipy.Spotify, user_id: str, suffix: str = " - Spotify"
@@ -42,7 +42,7 @@ def _get_sp_user_playlists(
 
 
 def _get_sp_tracks_from_playlist(
-    sp: spotipy.Spotify, user_id: str, playlist: Playlist
+    sp: spotipy.Spotify, user_id: str, playlist: Playlist,userInputs: UserInputs
 ) -> List[Track]:
     """Return list of tracks with metadata.
 
@@ -61,9 +61,21 @@ def _get_sp_tracks_from_playlist(
         # Tracks may no longer be on spotify in such cases return ""
         url = track["track"]["external_urls"].get("spotify", "")
         return Track(title, artist, album, url)
-
-    sp_playlist_tracks = sp.user_playlist_tracks(user_id, playlist.id)
-
+    try:
+        sp_playlist_tracks = sp.user_playlist_tracks(user_id, playlist.id)
+    except Exception:
+        logging.error("error while loading tracks of playlist")
+        
+        sp = spotipy.Spotify(
+                auth_manager=SpotifyClientCredentials(
+                    userInputs.spotipy_client_id,
+                    userInputs.spotipy_client_secret,
+                ),
+                retries= 10,
+                status_retries=10,
+                requests_timeout=10
+            )
+        sp_playlist_tracks = sp.user_playlist_tracks(user_id, playlist.id)
     # Only processes first 100 tracks
     tracks = list(
         map(
@@ -104,7 +116,7 @@ def spotify_playlist_sync(
     if playlists:
         for playlist in playlists:
             tracks = _get_sp_tracks_from_playlist(
-                sp, userInputs.spotify_user_id, playlist
+                sp, userInputs.spotify_user_id, playlist,userInputs
             )
             update_or_create_plex_playlist(plex, playlist, tracks, userInputs)
     else:

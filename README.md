@@ -4,6 +4,13 @@ Create spotify and deezer playlists in your plex account using tracks from your 
 
 This DOES NOT download any songs from anywhere.
 
+
+## Original Project
+`https://github.com/rnagabhyrava/plex-playlist-sync`
+
+Changes:
+- Reconnect/Recreate "connection" if Plex or Spotify connection drops
+
 ## Features
 * From Spotify: Sync all of the given user account's public playlists to plex
 * From Deezer: Sync all of the given user account's public playlists and/or any given public playlist IDs to plex

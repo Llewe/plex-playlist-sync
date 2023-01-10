@@ -2,7 +2,7 @@
 version: "2.1"
 services:
   playlistSync:
-    image: rnagabhyrava/plexplaylistsync:latest
+    image: llewe/plexplaylistsync:latest
     container_name: playlistSync
     # optional only if you chose WRITE_MISSING_AS_CSV=1 in env
     volumes:
